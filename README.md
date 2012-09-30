@@ -1,6 +1,8 @@
 Aerie
 =====
 
+Tiny app for storing and sharing a photo stream.
+
 Development
 -----------
 
