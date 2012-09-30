@@ -15,6 +15,11 @@ module Aerie
     end
   end
 
+  class NotFound < ApiError
+    def initialize
+      super(404, "Not found")
+    end
+  end
 
   class Unauthorized < ApiError
     def initialize

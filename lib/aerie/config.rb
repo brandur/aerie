@@ -2,6 +2,10 @@ module Aerie
   module Config
     extend self
 
+    def api_key
+      env!("API_KEY")
+    end
+
     def aws_bucket
       env!("AWS_BUCKET")
     end

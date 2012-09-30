@@ -19,11 +19,12 @@ helpers do
   end
 
   def auth_credentials
-    auth.provided? && auth.basic? ? auth.credentials : nil
+    auth.provided? && auth.basic? ? auth.credentials : []
   end
 
   def authorized!
-    raise Aerie::Unauthorized.new unless auth_credentials
+    raise Aerie::Unauthorized.new \
+      unless auth_credentials == ["", Aerie::Config.api_key]
   end
 
   def log(action, attrs={})
@@ -36,7 +37,18 @@ helpers do
   end
 end
 
+get "/photos" do
+  photo = Aerie::Photo.all
+  respond(photo.map(&:serialized_as_v0))
+end
+
+get "/photos/:key" do |key|
+  photo = Aerie::Photo.first(key: key) || raise(Aerie::NotFound.new)
+  respond(photo.serialized_as_v0)
+end
+
 post "/photos" do
+  authorized!
   unless params[:photo] && params[:photo][:tempfile]
     raise Aerie::BadRequest.new("Need parameter: photo")
   end
@@ -47,6 +59,7 @@ post "/photos" do
       params[:photo][:tempfile].read, Aerie::Config.aws_bucket,
       access: :public_read)
     log :store_photo, path: photo.path_of_original, format: "original"
+    Aerie::PhotoFormatter.new(photo).run
     respond(photo.serialized_as_v0, status: 201)
   end
 end
