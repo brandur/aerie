@@ -42,11 +42,11 @@ post "/photos" do
   end
   DB.transaction do
     photo = Aerie::Photo.create description: params[:description],
-      filename: params[:photo][:filename]
+      filename: params[:photo][:filename], formats: ["original"]
     AWS::S3::S3Object.store(photo.path_of_original,
       params[:photo][:tempfile].read, Aerie::Config.aws_bucket,
       access: :public_read)
-    log :store_photo, path: photo.path_of_original
-    respond(photo.serialized_as_v1, status: 201)
+    log :store_photo, path: photo.path_of_original, format: "original"
+    respond(photo.serialized_as_v0, status: 201)
   end
 end

@@ -12,17 +12,21 @@ module Aerie
       File.extname(filename).downcase
     end
 
-    def path_of_original
-      "#{key}/original#{file_extension}"
+    def path_of(format)
+      "#{key}/#{format}#{file_extension}"
     end
 
-    def serialized_as_v1
+    def path_of_original
+      path_of("original")
+    end
+
+    def serialized_as_v0
       {
         "key"      => key,
         "filename" => filename,
-        "files"    => {
-          "original" => s3_url(path_of_original),
-        },
+        "files"    => Hash[*formats.map { |format|
+          [format, s3_url(path_of(format))]
+        }.flatten],
       }
     end
 
